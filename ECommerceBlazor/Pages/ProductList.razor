@@ -3,28 +3,89 @@
 @using Services
 @inject IProductService productService
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Cars</PageTitle>
 
 <div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <label for="brandSelect">Select Brand:</label>
+            <select id="brandSelect" class="form-control" @onchange="FilterProductsByBrand">
+                <option value="">All Brands</option>
+                @foreach (var brand in brands)
+                {
+                    <option value="@brand">@brand</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label for="searchText">Search by Name:</label>
+            <input type="text" id="searchText" class="form-control" @bind="searchText" @oninput="OnSearchTextChange" placeholder="Search by car name..." />
+        </div>
+    </div>
+
     <div class="row">
-        @foreach (var product in products)
+        @if (filteredProducts.Any())
         {
-            <div class="col-sm-12 col-md-6 col-lg-4 mb-4">
-                <ProductItem Product="product" OnAddToCart="AddToCart" />
+            @foreach (var product in filteredProducts)
+            {
+                <div class="col-sm-12 col-md-6 col-lg-4 mb-4">
+                    <ProductItem Product="product" OnAddToCart="AddToCart" />
+                </div>
+            }
+        }
+        else
+        {
+            <div class="text-center">
+                <p>No products available for the selected filter.</p>
             </div>
         }
     </div>
 </div>
 
-@code{
+@code {
     private List<Product> products = new List<Product>();
+    private List<Product> filteredProducts = new List<Product>();
+    private List<string> brands = new List<string>();
+    private string searchText;
 
     protected override void OnInitialized()
     {
         products = productService.GetAllProducts();
+        filteredProducts = products;
+        brands = products.Select(product => product.Brand).Distinct().ToList();
     }
 
-    private void AddToCart(){
+    private void FilterProductsByBrand(ChangeEventArgs e)
+    {
+        string selectedBrand = e.Value?.ToString();
+        ApplyFilters(selectedBrand, searchText);
+    }
+
+    private void OnSearchTextChange(ChangeEventArgs e)
+    {
+        searchText = e.Value?.ToString() ?? string.Empty;
+        ApplyFilters(null, searchText);
+    }
+
+    private void ApplyFilters(string selectedBrand, string searchQuery)
+    {
+        filteredProducts = products;
+        if (!string.IsNullOrEmpty(selectedBrand) && selectedBrand != "All")
+        {
+            filteredProducts = filteredProducts.Where(p => p.Brand == selectedBrand).ToList();
+        }
+
+        if (!string.IsNullOrEmpty(searchQuery))
+        {
+            filteredProducts = filteredProducts.Where(p =>
+                p.Name.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                p.Description.Contains(searchQuery, StringComparison.OrdinalIgnoreCase)
+            ).ToList();
+        }
+    }
+
+    private void AddToCart()
+    {
 
     }
 }
