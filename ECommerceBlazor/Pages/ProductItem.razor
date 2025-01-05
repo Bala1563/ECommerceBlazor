@@ -1,0 +1,23 @@
+﻿@page "/product"
+@using Models
+
+<div class="card" style="width: 18rem;">
+    <img src="@Product.ImageUrl" class="card-img-top" alt="Product Image">
+    <div class="card-body">
+        <h5 class="card-title">@Product.Name</h5>
+        <p class="card-text">$@Product.Price</p>
+        <button class="btn btn-primary" @onclick="AddToCart">Add to Cart</button>
+    </div>
+</div>
+@code {
+    [Parameter] 
+    public Product Product { get; set; }
+    
+    [Parameter] 
+    public EventCallback<Product> OnAddToCart { get; set; }
+
+    private async Task AddToCart()
+    {
+        await OnAddToCart.InvokeAsync(Product);
+    }
+}

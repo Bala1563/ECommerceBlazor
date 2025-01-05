@@ -1,0 +1,30 @@
+﻿@page "/"
+@using Models
+@using Services
+@inject IProductService productService
+
+<PageTitle>Home</PageTitle>
+
+<div class="container mt-4">
+    <div class="row">
+        @foreach (var product in products)
+        {
+            <div class="col-sm-12 col-md-6 col-lg-4 mb-4">
+                <ProductItem Product="product" OnAddToCart="AddToCart" />
+            </div>
+        }
+    </div>
+</div>
+
+@code{
+    private List<Product> products = new List<Product>();
+
+    protected override void OnInitialized()
+    {
+        products = productService.GetAllProducts();
+    }
+
+    private void AddToCart(){
+
+    }
+}
