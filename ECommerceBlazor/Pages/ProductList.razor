@@ -2,6 +2,7 @@
 @using Models
 @using Services
 @inject IProductService productService
+@inject CartService cartService
 
 <PageTitle>Cars</PageTitle>
 
@@ -29,7 +30,7 @@
             @foreach (var product in filteredProducts)
             {
                 <div class="col-sm-12 col-md-6 col-lg-4 mb-4">
-                    <ProductItem Product="product" OnAddToCart="AddToCart" />
+                    <ProductItem T="Product" Product="product" OnAddToCart="AddToCart" />
                 </div>
             }
         }
@@ -84,8 +85,8 @@
         }
     }
 
-    private void AddToCart()
+    private void AddToCart(Product product)
     {
-
+        cartService.AddToCart(product);
     }
 }

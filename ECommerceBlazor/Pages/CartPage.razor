@@ -1,0 +1,91 @@
+﻿@page "/cart"
+@using Services
+@using Models
+@inject CartService cartService
+@inject NavigationManager navigationManager
+
+<PageTitle>Cart</PageTitle>
+
+@if (!cartService.cartProducts.Any())
+{
+    <div class="alert alert-warning text-center" role="alert">
+        Your cart is empty!
+    </div>
+}
+else
+{
+    <div class="container mt-4">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Total</th>
+                    <th>Increase</th>
+                    <th>Decrease</th>
+                    <th>Remove</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var product in cartService.cartProducts)
+                {
+                    <tr>
+                        <td>@product.Product.Name</td>
+                        <td>$@product.Product.Price</td>
+                        <td>@product.Quantity</td>
+                        <td>$@(product.Product.Price * product.Quantity)</td>
+                        <td>
+                            <button class="btn btn-sm btn-success" @onclick="() => IncrementQuantity(product)">
+                                <i class="bi bi-plus-lg"></i>
+                            </button>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-danger" @onclick="() => DecrementQuantity(product)">
+                                <i class="bi bi-dash-lg"></i>
+                            </button>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-secondary" @onclick="() => RemoveProduct(product)">
+                                <i class="bi bi-trash"></i> Remove
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <h5>Total Price: $@CalculateTotalPrice()</h5>
+            <button class="btn btn-primary" @onclick="BuyNow">Buy Now</button>
+        </div>
+    </div>
+}
+
+@code {
+
+    private void IncrementQuantity(Cart cartProduct){
+        cartService.IncrementQuantity(cartProduct.Product.Id);
+    }
+
+    private void DecrementQuantity(Cart cartProduct)
+    {
+        cartService.DecrementQuantity(cartProduct.Product.Id);
+    }
+
+    private void RemoveProduct(Cart cartProduct)
+    {
+        cartService.RemoveFromCart(cartProduct.Product);
+    }
+
+    private decimal CalculateTotalPrice()
+    {
+        return cartService.TotalPriceOfCart();
+    }
+
+    private void BuyNow()
+    {
+        navigationManager.NavigateTo("/buy");
+        cartService.RemoveAll();
+    }
+}
